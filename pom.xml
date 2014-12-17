@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>it.redhat.fuse</groupId>
+  <artifactId>war-example</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+  <name>ACN Example</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <version.buildhelper.maven.plugin>1.7</version.buildhelper.maven.plugin>
+    <version.maven.surefire>2.14</version.maven.surefire>
+
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.6</maven.compiler.source>
+
+    <maven.compiler.plugin.version>2.5.1</maven.compiler.plugin.version>
+    <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
+    <maven.bundle.plugin.version>2.3.7</maven.bundle.plugin.version>
+    <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+
+    <context>/example</context>
+
+    <jboss.fuse.bom.version>6.1.0.redhat-379</jboss.fuse.bom.version>
+
+    <warSourceDirectory>${basedir}/src/main/webapp</warSourceDirectory>
+    <packagingExcludes>**/classes/OSGI-INF/**,**/classes/META-INF/**,*/debug/**</packagingExcludes>
+    <packagingIncludes />
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jboss.fuse.bom</groupId>
+        <artifactId>jboss-fuse-parent</artifactId>
+        <version>${jboss.fuse.bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven.resources.plugin.version}</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <supportedProjectTypes>
+            <supportedProjectType>war</supportedProjectType>
+          </supportedProjectTypes>
+          <instructions>
+            <Webapp-Context>${context}</Webapp-Context>
+            <Web-ContextPath>${context}</Web-ContextPath>
+
+            <Embed-Directory>WEB-INF/lib</Embed-Directory>
+            <Embed-Dependency>*;scope=compile|runtime;artifactId=!org.osgi.enterprise|org.osgi.core</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+
+            <!-- fix jgit, and slf4j imports -->
+            <Import-Package>
+              org.osgi.framework,
+              org.osgi.util.tracker,
+              org.eclipse.jetty.plus.jaas.spi;resolution:=optional,
+              org.eclipse.jetty.plus.jaas.callback;resolution:=optional,
+              org.apache.commons.logging;resolution:=optional,
+              org.slf4j;resolution:=optional,
+              !org.slf4j.impl,
+              *
+            </Import-Package>
+
+            <Bundle-ClassPath>.</Bundle-ClassPath>
+            <Bundle-Name>${project.description}</Bundle-Name>
+            <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+
+            <Implementation-Title>example webapp</Implementation-Title>
+            <Implementation-Version>${project.version}</Implementation-Version>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>${maven.war.plugin.version}</version>
+        <configuration>
+          <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
+          <warSourceDirectory>${warSourceDirectory}</warSourceDirectory>
+          <packagingExcludes>${packagingExcludes}</packagingExcludes>
+          <packagingIncludes>${packagingIncludes}</packagingIncludes>
+          <failOnMissingWebXml>true</failOnMissingWebXml>
+          <archive>
+            <manifestFile>${basedir}/target/classes/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

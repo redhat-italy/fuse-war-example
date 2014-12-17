@@ -9,7 +9,7 @@
   <artifactId>war-example</artifactId>
   <version>1.0.0</version>
   <packaging>war</packaging>
-  <name>ACN Example</name>
+  <name>WAR Example</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
